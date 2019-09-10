@@ -45,11 +45,11 @@
          (output (shell-command-to-string command)))
     (if (string-match "\\[\\([0-9]+\\)%\\]" output)
         (string-to-number (match-string 1 output))
-      (error "unexpected output from amixer: %s" output))))
+      (error "Unexpected output from amixer: %s" output))))
 
 ;;;###autoload
 (defun amixer-set-volume (perc)
-  "Set volume of master via amixer."
+  "Set volume to PERC of master via amixer."
   (interactive "nVolume (percentage): ")
   (let ((perc (if (< perc 0) 0 (if (> perc 100) 100 perc))))
     (shell-command-to-string (format "amixer sset Master playback %d%%" perc))
@@ -57,7 +57,7 @@
 
 ;;;###autoload
 (defun amixer-up-volume (&optional perc)
-  "Set volume of master via amixer."
+  "Set volume of master via amixer, step size can be passed by PERC."
   (interactive "P")
   (amixer-set-volume (+ (amixer-get-volume)
                         (or perc
@@ -65,14 +65,17 @@
 
 ;;;###autoload
 (defun amixer-down-volume (&optional perc)
-  "Set volume of master via amixer."
+  "Set volume of master via amixer, step size can be passed by PERC."
   (interactive "P")
   (amixer-up-volume (* -1 (or perc
                               amixer-default-volume-increment))))
 
 ;;;###autoload
 (defun amixer-toggle-mute ()
+  "Mute/unmute master via amixer."
   (interactive)
   (shell-command-to-string "amixer -D pulse set Master toggle"))
 
 (provide 'amixer)
+
+;;; amixer.el ends here
