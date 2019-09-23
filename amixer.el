@@ -34,6 +34,10 @@
 
 ;;; Code:
 
+(defgroup amixer nil "Functions to call out to amixer."
+  :prefix "amixer-"
+  :group 'multimedia)
+
 (defcustom amixer-default-volume-increment 5
   "Default percentage to increment (or decrement) the volume of master."
   :group 'amixer
