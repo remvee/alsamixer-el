@@ -1,4 +1,4 @@
-amixer.el -- Basic commands to control audio volume via amixer
+alsamixer.el -- Basic commands to control audio volume via amixer
 
 Copyright (C) 2019 R.W van 't Veer
 

@@ -1,4 +1,4 @@
-;;; amixer.el --- Functions to call out to amixer.
+;;; alsamixer.el --- Functions to call out to amixer.
 
 ;; Copyright (C) 2013 R.W van 't Veer
 
@@ -6,7 +6,7 @@
 ;; Created: 18 Jun 2013
 ;; Keywords: convenience
 ;; Version: 0.1
-;; URL: https://github.com/remvee/amixer-el
+;; URL: https://github.com/remvee/alsamixer-el
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -28,22 +28,22 @@
 ;; Very basic interface to amixer commandline tool to control audio
 ;; volume.
 ;;
-;; (global-set-key (kbd "<XF86AudioRaiseVolume>") #'amixer-up-volume)
-;; (global-set-key (kbd "<XF86AudioLowerVolume>") #'amixer-down-volume)
-;; (global-set-key (kbd "<XF86AudioMute>") #'amixer-toggle-mute)
+;; (global-set-key (kbd "<XF86AudioRaiseVolume>") #'alsamixer-up-volume)
+;; (global-set-key (kbd "<XF86AudioLowerVolume>") #'alsamixer-down-volume)
+;; (global-set-key (kbd "<XF86AudioMute>") #'alsamixer-toggle-mute)
 
 ;;; Code:
 
-(defgroup amixer nil "Functions to call out to amixer."
-  :prefix "amixer-"
+(defgroup alsamixer nil "Functions to call out to amixer."
+  :prefix "alsamixer-"
   :group 'multimedia)
 
-(defcustom amixer-default-volume-increment 5
+(defcustom alsamixer-default-volume-increment 5
   "Default percentage to increment (or decrement) the volume of master."
-  :group 'amixer
+  :group 'alsamixer
   :type 'integer)
 
-(defun amixer-get-volume ()
+(defun alsamixer-get-volume ()
   "Return volume of master in percentage."
   (let* ((command "amixer sget Master playback")
          (output (shell-command-to-string command)))
@@ -52,7 +52,7 @@
       (error "Unexpected output from amixer: %s" output))))
 
 ;;;###autoload
-(defun amixer-set-volume (perc)
+(defun alsamixer-set-volume (perc)
   "Set volume to PERC of master via amixer."
   (interactive "nVolume (percentage): ")
   (let ((perc (if (< perc 0) 0 (if (> perc 100) 100 perc))))
@@ -60,26 +60,26 @@
     (let (message-log-max) (message "Volume set to %s%%" perc))))
 
 ;;;###autoload
-(defun amixer-up-volume (&optional perc)
+(defun alsamixer-up-volume (&optional perc)
   "Set volume of master via amixer, step size can be passed by PERC."
   (interactive "P")
-  (amixer-set-volume (+ (amixer-get-volume)
-                        (or perc
-                            amixer-default-volume-increment))))
+  (alsamixer-set-volume (+ (alsamixer-get-volume)
+                           (or perc
+                               alsamixer-default-volume-increment))))
 
 ;;;###autoload
-(defun amixer-down-volume (&optional perc)
+(defun alsamixer-down-volume (&optional perc)
   "Set volume of master via amixer, step size can be passed by PERC."
   (interactive "P")
-  (amixer-up-volume (* -1 (or perc
-                              amixer-default-volume-increment))))
+  (alsamixer-up-volume (* -1 (or perc
+                                 alsamixer-default-volume-increment))))
 
 ;;;###autoload
-(defun amixer-toggle-mute ()
+(defun alsamixer-toggle-mute ()
   "Mute/unmute master via amixer."
   (interactive)
   (shell-command-to-string "amixer -D pulse set Master toggle"))
 
-(provide 'amixer)
+(provide 'alsamixer)
 
-;;; amixer.el ends here
+;;; alsamixer.el ends here
