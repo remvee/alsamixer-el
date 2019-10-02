@@ -43,20 +43,25 @@
   :group 'alsamixer
   :type 'integer)
 
+(defcustom alsamixer-amixer-command "amixer"
+  "Name of amixer command."
+  :group 'alsamixer
+  :type 'string)
+
 (defun alsamixer-get-volume ()
   "Return volume of master in percentage."
-  (let* ((command "amixer sget Master playback")
+  (let* ((command (format "%s sget Master playback" alsamixer-amixer-command))
          (output (shell-command-to-string command)))
     (if (string-match "\\[\\([0-9]+\\)%\\]" output)
         (string-to-number (match-string 1 output))
-      (error "Unexpected output from amixer: %s" output))))
+      (error "Unexpected output from %s: %s" alsamixer-amixer-command output))))
 
 ;;;###autoload
 (defun alsamixer-set-volume (perc)
   "Set volume to PERC of master via amixer."
   (interactive "nVolume (percentage): ")
   (let ((perc (if (< perc 0) 0 (if (> perc 100) 100 perc))))
-    (shell-command-to-string (format "amixer sset Master playback %d%%" perc))
+    (shell-command-to-string (format "%s sset Master playback %d%%" alsamixer-amixer-command perc))
     (let (message-log-max) (message "Volume set to %s%%" perc))))
 
 ;;;###autoload
@@ -78,7 +83,7 @@
 (defun alsamixer-toggle-mute ()
   "Mute/unmute master via amixer."
   (interactive)
-  (shell-command-to-string "amixer -D pulse set Master toggle"))
+  (shell-command-to-string (format "%s set Master toggle" alsamixer-amixer-command)))
 
 (provide 'alsamixer)
 
