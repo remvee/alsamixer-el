@@ -72,7 +72,7 @@
          (command (if alsamixer-device
                       (format "%s -D %s" command alsamixer-device)
                     command))
-         (args (replace-regexp-in-string "%C" alsamixer-control args)))
+         (args (replace-regexp-in-string "%C" alsamixer-control args t t)))
     (apply #'format (concat command " "args) objs)))
 
 (defun alsamixer-get-volume ()
