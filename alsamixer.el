@@ -48,9 +48,30 @@
   :group 'alsamixer
   :type 'string)
 
+(defcustom alsamixer-card nil
+  "Card number to control."
+  :group 'alsamixer
+  :type 'string)
+
+(defcustom alsamixer-device nil
+  "Device name to control."
+  :group 'alsamixer
+  :type 'string)
+
+(defun alsamixer-command (args &rest objs)
+  "Build an amixer command with given ARGS and OBJS, as in `format'."
+  (let* ((command alsamixer-amixer-command)
+         (command (if alsamixer-card
+                      (format "%s -c %d" command alsamixer-card)
+                    command))
+         (command (if alsamixer-device
+                      (format "%s -D %s" command alsamixer-device)
+                    command)))
+    (apply #'format (concat command " " args) objs)))
+
 (defun alsamixer-get-volume ()
   "Return volume of master in percentage."
-  (let* ((command (format "%s sget Master playback" alsamixer-amixer-command))
+  (let* ((command (alsamixer-command "sget Master playback"))
          (output (shell-command-to-string command)))
     (if (string-match "\\[\\([0-9]+\\)%\\]" output)
         (string-to-number (match-string 1 output))
@@ -61,7 +82,7 @@
   "Set volume to PERC of master via amixer."
   (interactive "nVolume (percentage): ")
   (let ((perc (if (< perc 0) 0 (if (> perc 100) 100 perc))))
-    (shell-command-to-string (format "%s sset Master playback %d%%" alsamixer-amixer-command perc))
+    (shell-command-to-string (alsamixer-command "sset Master playback %d%%" perc))
     (let (message-log-max) (message "Volume set to %s%%" perc))))
 
 ;;;###autoload
@@ -83,7 +104,7 @@
 (defun alsamixer-toggle-mute ()
   "Mute/unmute master via amixer."
   (interactive)
-  (shell-command-to-string (format "%s set Master toggle" alsamixer-amixer-command)))
+  (shell-command-to-string (alsamixer-command "set Master toggle")))
 
 (provide 'alsamixer)
 
