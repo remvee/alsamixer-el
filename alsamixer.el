@@ -58,6 +58,11 @@
   :group 'alsamixer
   :type 'string)
 
+(defcustom alsamixer-control "Master"
+  "Name of control."
+  :group 'alsamixer
+  :type 'string)
+
 (defun alsamixer-command (args &rest objs)
   "Build an amixer command with given ARGS and OBJS, as in `format'."
   (let* ((command alsamixer-amixer-command)
@@ -66,12 +71,13 @@
                     command))
          (command (if alsamixer-device
                       (format "%s -D %s" command alsamixer-device)
-                    command)))
-    (apply #'format (concat command " " args) objs)))
+                    command))
+         (args (replace-regexp-in-string "%C" alsamixer-control args)))
+    (apply #'format (concat command " "args) objs)))
 
 (defun alsamixer-get-volume ()
-  "Return volume of master in percentage."
-  (let* ((command (alsamixer-command "sget Master playback"))
+  "Return volume in percentage."
+  (let* ((command (alsamixer-command "sget %C playback"))
          (output (shell-command-to-string command)))
     (if (string-match "\\[\\([0-9]+\\)%\\]" output)
         (string-to-number (match-string 1 output))
@@ -79,15 +85,15 @@
 
 ;;;###autoload
 (defun alsamixer-set-volume (perc)
-  "Set volume to PERC of master via amixer."
+  "Set volume to PERC."
   (interactive "nVolume (percentage): ")
   (let ((perc (if (< perc 0) 0 (if (> perc 100) 100 perc))))
-    (shell-command-to-string (alsamixer-command "sset Master playback %d%%" perc))
+    (shell-command-to-string (alsamixer-command "sset %C playback %d%%" perc))
     (let (message-log-max) (message "Volume set to %s%%" perc))))
 
 ;;;###autoload
 (defun alsamixer-up-volume (&optional perc)
-  "Set volume of master via amixer, step size can be passed by PERC."
+  "Set volume, step size can be passed by PERC."
   (interactive "P")
   (alsamixer-set-volume (+ (alsamixer-get-volume)
                            (or perc
@@ -95,16 +101,16 @@
 
 ;;;###autoload
 (defun alsamixer-down-volume (&optional perc)
-  "Set volume of master via amixer, step size can be passed by PERC."
+  "Set volume, step size can be passed by PERC."
   (interactive "P")
   (alsamixer-up-volume (* -1 (or perc
                                  alsamixer-default-volume-increment))))
 
 ;;;###autoload
 (defun alsamixer-toggle-mute ()
-  "Mute/unmute master via amixer."
+  "Mute / unmute."
   (interactive)
-  (shell-command-to-string (alsamixer-command "set Master toggle")))
+  (shell-command-to-string (alsamixer-command "set %C toggle")))
 
 (provide 'alsamixer)
 
